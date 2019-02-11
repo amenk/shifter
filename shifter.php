@@ -125,5 +125,14 @@ class Shifter
 
         $this->gitHub->api('repo')->remove($this->userName, $this->temporaryRepo['name']);
         echo 'GitHub temporary repository deleted' . PHP_EOL;
+
+        $repo = new \Cz\Git\GitRepository(getcwd());
+
+        try {
+            $repo->removeRemote('shifter');
+        } catch (\Cz\Git\GitException $e) {
+            echo "Not necessary to remove remote" . PHP_EOL;
+        }
+
     }
 }
