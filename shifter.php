@@ -109,6 +109,6 @@ class Shifter
         echo "Now please go to https://laravelshift.com/shifts purchase a shift and enter the following repo name:" . PHP_EOL;
         echo $this->temporaryRepo['full_name'] . PHP_EOL;
         echo "And this branch:" . PHP_EOL;
-        echo $this->currentBranch;
+        echo $this->currentBranch . PHP_EOL;
     }
 }
