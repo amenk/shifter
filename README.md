@@ -15,3 +15,15 @@ Push your repository to a on-the-fly created private GitHub repository. Instruct
 # Alternatives
 
 You can also use dockerized shifts.
+
+# Installation
+
+1. Clone this repository
+2. Obtain a GitHub token and store it in `.github_token`
+3. Run composer install
+4. Symlink shifter.php  `ln shifter.php /usr/local/bin/shifter`
+
+
+For each project you want to shift
+
+* Call `shifter` from the directory of your project
