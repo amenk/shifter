@@ -46,17 +46,38 @@ class Shifter
     public function execute($action)
     {
         switch ($action) {
-            case "clean":
-                $this->authenticate();
-                $this->removeTemporaryRepository();
-                break;
-            default:
+            case "push":
                 $this->authenticate();
                 $this->ensureTemporaryRepositoryExists();
                 $this->push();
                 $this->sayHowToShift();
                 break;
+            case "show":
+                $this->authenticate();
+                $this->exportPullRequest();
+                break;
+            case "clean":
+                $this->authenticate();
+                $this->removeTemporaryRepository();
+                break;
+            default:
+                $this->showHelp();
+                break;
         }
+    }
+
+    protected function showHelp()
+    {
+        echo 'You can use the following parameters (in the order of the lifecycle)' . PHP_EOL;
+
+        echo PHP_EOL;
+        
+        echo 'shifter push (Step 1)' . PHP_EOL;
+        echo '(do your shift now)' . PHP_EOL;
+        echo '(merge back)' . PHP_EOL;
+        echo 'shifter show > my-shift.md (show the latest merge request, dump to file)' . PHP_EOL;
+        echo 'shifter clean (remove the repo from github)' . PHP_EOL;
+
     }
 
     protected function authenticate()
@@ -137,6 +158,25 @@ class Shifter
         } catch (\Cz\Git\GitException $e) {
             echo "Not necessary to remove remote" . PHP_EOL;
         }
+    }
 
+    protected function exportPullRequest()
+    {
+        $issues = $this->gitHub->api('issues')->all($this->userName, $this->temporaryRepoName);
+        $lastIssue = array_pop($issues);
+
+        $result = sprintf('== Pull Request %d == ', $lastIssue['number']) . PHP_EOL . PHP_EOL;
+
+        $result .= $lastIssue['body'] . PHP_EOL . PHP_EOL;;
+
+        $comments =  $this->gitHub->api('issue')->comments()->all($this->userName, $this->temporaryRepoName, $lastIssue['number']);
+
+        foreach($comments as $sequence => $comment) {
+            $result .= sprintf('=== Comment %d === ', $sequence + 1) . PHP_EOL . PHP_EOL;
+            $result .= $comment['body'] . PHP_EOL . PHP_EOL;
+        }
+
+        echo $result;
     }
 }
+
