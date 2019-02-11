@@ -21,7 +21,9 @@ You can also use dockerized shifts.
 1. Clone this repository
 2. Obtain a GitHub token and store it in `.github_token`
 3. Run composer install
-4. Symlink shifter.php  `ln shifter.php /usr/local/bin/shifter`
+4. Symlink shifter.php  
+    
+    sudo ln -s `realpath shifter.php` /usr/local/bin/shifter
 
 
 For each project you want to shift
