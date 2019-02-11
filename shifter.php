@@ -3,11 +3,15 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+$action = $argv[1] ?? '';
+
 $shifter = new Shifter();
-$shifter->execute();
+$shifter->execute($action);
 
 class Shifter
 {
+    const REPO_DESCRIPTION = 'Shifter Temporary Repo, can be deleted after shifting';
+
     /**
      * @var \Github\Client
      */
@@ -39,12 +43,20 @@ class Shifter
         $this->temporaryRepoName = 'shifter-temporary--' . basename(getcwd());
     }
 
-    public function execute()
+    public function execute($action)
     {
-        $this->authenticate();
-        $this->ensureTemporaryRepositoryExists();
-        $this->push();
-        $this->sayHowToShift();
+        switch ($action) {
+            case "clean":
+                $this->authenticate();
+                $this->removeTemporaryRepository();
+                break;
+            default:
+                $this->authenticate();
+                $this->ensureTemporaryRepositoryExists();
+                $this->push();
+                $this->sayHowToShift();
+                break;
+        }
     }
 
     protected function authenticate()
@@ -72,7 +84,7 @@ class Shifter
             }
         } catch (\Github\Exception\RuntimeException $exception) {
             $this->temporaryRepo = $this->gitHub->api('repo')->create($this->temporaryRepoName,
-                'Shifter Temporary Repo, can be deleted after shifting', '', false);
+                self::REPO_DESCRIPTION, '', false);
         }
     }
 
@@ -102,5 +114,16 @@ class Shifter
         echo $this->temporaryRepo['full_name'] . PHP_EOL;
         echo "And this branch:" . PHP_EOL;
         echo $this->currentBranch . PHP_EOL;
+    }
+
+    protected function removeTemporaryRepository()
+    {
+        $this->temporaryRepo = $this->gitHub->api('repo')->show($this->userName, $this->temporaryRepoName);
+        if ($this->temporaryRepo['description'] != self::REPO_DESCRIPTION) {
+            throw new Exception('We will work only on repos with the description "' . self::REPO_DESCRIPTION . '"');
+       }
+
+        $this->gitHub->api('repo')->remove($this->userName, $this->temporaryRepo['name']);
+        echo 'GitHub temporary repository deleted' . PHP_EOL;
     }
 }
