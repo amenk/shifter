@@ -114,6 +114,10 @@ class Shifter
         echo $this->temporaryRepo['full_name'] . PHP_EOL;
         echo "And this branch:" . PHP_EOL;
         echo $this->currentBranch . PHP_EOL;
+
+        echo "After you are finished, review the merge request at github, and next, merge back into your local repository using" . PHP_EOL;
+        echo "git fetch shifter && git merge shifter/" . $this->currentBranch . PHP_EOL;
+
     }
 
     protected function removeTemporaryRepository()
