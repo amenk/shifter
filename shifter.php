@@ -41,17 +41,10 @@ class Shifter
 
     public function execute()
     {
-        try {
-            $this->authenticate();
-            $this->ensureTemporaryRepositoryExists();
-            $this->push();
-            $this->sayHowToShift();
-        } catch (\Exception $exception) {
-            echo sprintf('ERROR: %s @ %s:%d',
-                    $exception->getMessage(),
-                    $exception->getFile(),
-                    $exception->getLine()) . PHP_EOL;
-        }
+        $this->authenticate();
+        $this->ensureTemporaryRepositoryExists();
+        $this->push();
+        $this->sayHowToShift();
     }
 
     protected function authenticate()
@@ -72,13 +65,12 @@ class Shifter
 
     protected function ensureTemporaryRepositoryExists()
     {
-        $this->temporaryRepo = $this->gitHub->api('repo')->show($this->userName, $this->temporaryRepoName);
-
-        if ($this->temporaryRepo) {
+        try {
+            $this->temporaryRepo = $this->gitHub->api('repo')->show($this->userName, $this->temporaryRepoName);
             if ( ! $this->temporaryRepo ['private']) {
                 throw \Exception('Refusing to work on public repos.');
             }
-        } else {
+        } catch (\Github\Exception\RuntimeException $exception) {
             $this->temporaryRepo = $this->gitHub->api('repo')->create($this->temporaryRepoName,
                 'Shifter Temporary Repo, can be deleted after shifting', '', false);
         }
