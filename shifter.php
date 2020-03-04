@@ -37,10 +37,15 @@ class Shifter
      */
     protected $currentBranch;
 
+    /**
+     * @var string
+     */
+    protected $token;
+
     public function __construct()
     {
         $this->gitHub = new \Github\Client();
-        $this->temporaryRepoName = 'shifter-temporary--' . basename(getcwd());
+        $this->temporaryRepoName = 'shift';
     }
 
     public function execute($action)
@@ -84,14 +89,14 @@ class Shifter
     {
         $tokenFile = __DIR__ . '/.github_token';
 
-        $token = trim(@file_get_contents($tokenFile));
+        $this->token = trim(@file_get_contents($tokenFile));
 
-        if ( ! $token) {
+        if ( ! $this->token) {
             echo "Go to https://github.com/settings/tokens , create a token for repo access and repo_delete and put the token into $tokenFile" . PHP_EOL;
             die();
         }
 
-        $this->gitHub->authenticate($token, '', \Github\Client::AUTH_HTTP_TOKEN);
+        $this->gitHub->authenticate($this->token, '', \Github\Client::AUTH_HTTP_TOKEN);
 
         $this->userName = $this->gitHub->api('current_user')->show()['login'];
     }
@@ -111,7 +116,7 @@ class Shifter
 
     protected function push()
     {
-        $sshUrl = $this->temporaryRepo['ssh_url'];
+        $repoUrl = $this->buildRepoUrl();
 
         $repo = new \Cz\Git\GitRepository(getcwd());
         $this->currentBranch = $repo->getCurrentBranchName();
@@ -122,7 +127,7 @@ class Shifter
             echo "Not necessary to remove remote" . PHP_EOL;
         }
 
-        $repo->addRemote('shifter', $sshUrl);
+        $repo->addRemote('shifter', $repoUrl);
 
         echo 'Pushing...';
         $repo->push('shifter', [$this->currentBranch]);
@@ -177,6 +182,16 @@ class Shifter
         }
 
         echo $result;
+    }
+
+    /**
+     * @return string
+     */
+    protected function buildRepoUrl(): string
+    {
+        $parts = parse_url($this->temporaryRepo['clone_url']);
+
+        return $parts['scheme'] . '://' . $this->userName . ':' . $this->token . '@' . $parts['host'] . $parts['path'];
     }
 }
 
