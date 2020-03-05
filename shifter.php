@@ -170,14 +170,14 @@ class Shifter
         $issues = $this->gitHub->api('issues')->all($this->userName, $this->temporaryRepoName);
         $lastIssue = array_pop($issues);
 
-        $result = sprintf('== Pull Request %d == ', $lastIssue['number']) . PHP_EOL . PHP_EOL;
+        $result = sprintf('# Pull Request %d', $lastIssue['number']) . PHP_EOL . PHP_EOL;
 
         $result .= $lastIssue['body'] . PHP_EOL . PHP_EOL;;
 
         $comments =  $this->gitHub->api('issue')->comments()->all($this->userName, $this->temporaryRepoName, $lastIssue['number']);
 
         foreach($comments as $sequence => $comment) {
-            $result .= sprintf('=== Comment %d === ', $sequence + 1) . PHP_EOL . PHP_EOL;
+            $result .= sprintf('## Comment %d', $sequence + 1) . PHP_EOL . PHP_EOL;
             $result .= $comment['body'] . PHP_EOL . PHP_EOL;
         }
 
