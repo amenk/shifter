@@ -1,6 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+use CzProject\GitPhp\GitException;
+use CzProject\GitPhp\GitRepository;
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 $action = $argv[1] ?? '';
@@ -118,19 +121,19 @@ class Shifter
     {
         $repoUrl = $this->buildRepoUrl();
 
-        $repo = new \Cz\Git\GitRepository(getcwd());
+        $repo = new GitRepository(getcwd());
         $this->currentBranch = $repo->getCurrentBranchName();
 
         try {
             $repo->removeRemote('shifter');
-        } catch (\Cz\Git\GitException $e) {
+        } catch (GitException $e) {
             echo "Not necessary to remove remote" . PHP_EOL;
         }
 
         $repo->addRemote('shifter', $repoUrl);
 
         echo 'Pushing...';
-        $repo->push('shifter', [$this->currentBranch]);
+        $repo->push('shifter');
         echo 'done' . PHP_EOL;
     }
 
@@ -156,11 +159,11 @@ class Shifter
         $this->gitHub->api('repo')->remove($this->userName, $this->temporaryRepo['name']);
         echo 'GitHub temporary repository deleted' . PHP_EOL;
 
-        $repo = new \Cz\Git\GitRepository(getcwd());
+        $repo = new GitRepository(getcwd());
 
         try {
             $repo->removeRemote('shifter');
-        } catch (\Cz\Git\GitException $e) {
+        } catch (GitException $e) {
             echo "Not necessary to remove remote" . PHP_EOL;
         }
     }
