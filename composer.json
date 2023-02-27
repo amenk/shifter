@@ -10,6 +10,6 @@
         "php": "~7.2",
         "knplabs/github-api": "^2.11",
         "php-http/guzzle6-adapter": "^1.1",
-        "czproject/git-php": "^3.17"
+        "czproject/git-php": "^4.0"
     }
 }
